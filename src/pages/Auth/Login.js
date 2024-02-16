@@ -11,26 +11,42 @@ import {
     View,
   } from 'react-native';
   import React, {useCallback, useState} from 'react';
-  import {SafeAreaView} from 'react-native-safe-area-context';
-  import logo from '../../Assets/loginlogo.png';
-  import back from '../../Assets/back.png';
+  // import {SafeAreaView} from 'react-native-safe-area-context';
+  // import logo from '../../Assets/loginlogo.png';
+// import back from '../../Assets/back.png';
+  import { login } from '../../Utils/auth';
   import LinearGradient from 'react-native-linear-gradient';
   import {
     responsiveFontSize,
     responsiveHeight,
     responsiveWidth,
   } from 'react-native-responsive-dimensions';
-  import {useNavigation} from '@react-navigation/native';
-  const Login = () => {
+import { useNavigation } from '@react-navigation/native';
+import { images } from "../../Utils/constants/Themes"
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const Login = (props) => {
+    
     const navigation = useNavigation();
   
     const [selected, setSelected] = useState(0);
-    const btn = useCallback(n => {
-      setSelected(n);
-    }, []);
+    // const btn = useCallback(n => {
+    //   setSelected(n);
+  // }, []);
+  
+  const handleLogin = async () => {
+    // props.authenticated
+    try {
+      const res = await login("aa@gmail.com","123abc");
+      console.log(res, "Login RESPONSE")
+      await AsyncStorage.setItem('token', 'ssdaasd');
+      // navigation.navigate('AppMain');
+    } catch (error) {
+      
+    }
+  }
     return (
       <ImageBackground
-        source={logo}
+        // source={logo}
         style={{
           flex: 1,
         }}>
@@ -40,23 +56,24 @@ import {
           backgroundColor={'transparent'}
         />
   
-        <View style={styles.header}>
-          <TouchableOpacity
+        <View style={styles.header} >
+          <TouchableOpacity 
+      
             onPress={() => {
               navigation.pop();
             }}>
-            <Image resizeMode="contain" source={back} style={styles.back} />
+            <Image  resizeMode="contain" source={images.back} style={styles.back} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('signup');
+              navigation.navigate('Signup');
             }}>
             <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
         <View style={{flex: 0.6}}>
           <View>
-            <Text style={styles.txt_intro}>Sign In</Text>
+            <Text style={styles.txt_intro}>Login</Text>
           </View>
           <View
             style={{
@@ -75,19 +92,17 @@ import {
           <Pressable
             style={{zIndex: 9999, marginVertical: responsiveHeight(1)}}
             onPress={() => {
-              navigation.navigate('forgetpassword');
+              // navigation.navigate('forgetpassword');
             }}>
-            <Text style={styles.forget}>Forget??</Text>
+          
           </Pressable>
   
           <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('MyTabs');
-            }}>
+            onPress={handleLogin}>
             <LinearGradient
               start={{x: 0, y: 0}}
               end={{x: 1, y: 0}}
-              colors={selected == 0 ? ['#FFB424', '#D86E06'] : ['#fff', '#ffff']}
+              colors={['#232323', '#020f00']}
               style={styles.linearGradient}>
               <Text style={[styles.btnText]}>Login</Text>
             </LinearGradient>
@@ -127,6 +142,8 @@ import {
       color: '#000',
     },
     header: {
+      
+ 
       flexDirection: 'row',
       justifyContent: 'space-between',
       paddingHorizontal: responsiveWidth(6),
@@ -145,14 +162,8 @@ import {
     back: {
       height: responsiveHeight(4),
       width: responsiveWidth(8),
-      top: responsiveHeight(4),
+      // top: responsiveHeight(1),
     },
-    forget: {
-      color: '#000',
-      fontSize: responsiveFontSize(2),
-      fontFamily: 'Taviraj-Black',
-      textAlign: 'center',
-      top: responsiveHeight(2),
-    },
+
   });
   

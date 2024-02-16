@@ -9,30 +9,50 @@ import {
     TouchableOpacity,
     View,
   } from 'react-native';
-  import React, {useCallback, useState} from 'react';
-  import {SafeAreaView} from 'react-native-safe-area-context';
-  import logo from '../../Assets/signup.png';
-  import back from '../../Assets/back.png';
-  import LinearGradient from 'react-native-linear-gradient';
+import React, { useCallback, useState } from 'react';
+  import {images} from "../../Utils/constants/Themes"
+import LinearGradient from 'react-native-linear-gradient';
+  import { postUsers } from '../../Utils/Api';
   import {
     responsiveFontSize,
     responsiveHeight,
     responsiveWidth,
   } from 'react-native-responsive-dimensions';
   import {useNavigation} from '@react-navigation/native';
-  
+import { createUser } from '../../Utils/auth';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
   const Signup = () => {
     const navigation = useNavigation();
-    const [selected, setSelected] = useState(0);
-    const btn = useCallback(n => {
-      setSelected(n);
-    }, []);
+    const [email, setEmail] = useState(0);
+    const [password, setPassword] = useState(0);
+
+
+    const handleSignup = async () => {
+      try {
+        console.log(email, password, "email and password")
+        // navigation.navigate('Login');
+        const res = await createUser(email, password)
+        const id = await postUsers()
+        console.log(id, "new generated id")
+      console.log(res, "Signup Response")
+       
+      } catch (error) {
+        console.log(error)
+        
+      }
+
+      
+      
+    }
     return (
-      <ImageBackground
-        source={logo}
-        style={{
-          flex: 1,
-        }}>
+      <View  style={{
+        flex:1
+      }}>
+      {/* // <ImageBackground */}
+        {/* // source={logo}
+        // style={{ */}
+        {/* //   flex: 1,
+        // }}> */}
         <StatusBar
           translucent={true}
           barStyle={'dark-content'}
@@ -44,12 +64,15 @@ import {
             onPress={() => {
               navigation.pop();
             }}>
-            <Image resizeMode="contain" source={back} style={styles.back} />
+
+            <Image resizeMode="contain" source={images.back} style={styles.back} />
           </TouchableOpacity>
           <TouchableOpacity
+           
             onPress={() => {
-              navigation.navigate('login');
-            }}>
+              navigation.navigate('Login');
+            }}
+          >
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
         </View>
@@ -67,10 +90,10 @@ import {
               <TextInput placeholder="User Name" placeholderTextColor={'#000'} />
             </View>
             <View style={styles.txt_input}>
-              <TextInput placeholder="Your Email" placeholderTextColor={'#000'} />
+              <TextInput value={email} onChangeText={(text)=>{setEmail(text)}} placeholder="Your Email" placeholderTextColor={'#000'} />
             </View>
             <View style={styles.txt_input}>
-              <TextInput placeholder="Password" placeholderTextColor={'#000'} />
+              <TextInput value={password} onChangeText={(text)=>setPassword(text)} placeholder="Password" placeholderTextColor={'#000'} />
             </View>
             <View style={styles.txt_input}>
               <TextInput
@@ -79,17 +102,18 @@ import {
               />
             </View>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity  onPress={handleSignup}>
             <LinearGradient
               start={{x: 0, y: 0}}
               end={{x: 1, y: 0}}
-              colors={selected == 0 ? ['#FFB424', '#D86E06'] : ['#fff', '#ffff']}
+              colors={['#232323', '#020f00']}
               style={styles.linearGradient}>
               <Text style={[styles.btnText]}>Sign Up</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
-      </ImageBackground>
+      {/* // </ImageBackground> */}
+      </View>
     );
   };
   
