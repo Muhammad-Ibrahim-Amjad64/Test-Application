@@ -8,31 +8,29 @@ const AIChat = () => {
 
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
+  
 
   const sendMessage = async () => {
     if (!userInput) return;
 
-    setMessages(prevMessages => [...prevMessages, `You\n  ${userInput}`]);
-    // setMessages(prevMessages => [...prevMessages, `${userInput}`]);
+    // setMessages(prevMessages => [...prevMessages, `You\n  ${userInput}`]);
+    setMessages(prevMessages => [...prevMessages,  { sender: 'user', message: userInput }]);
     const botResponse = await generateResponse(userInput);
-    setMessages(prevMessages => [...prevMessages, `${botResponse}`]);
-    setMessages(prevMessages => [...prevMessages, `ChatGPT\n  ${botResponse}`]);
+    setMessages(prevMessages => [...prevMessages, { sender: 'bot', message: botResponse }]);
     setUserInput('');
-
-
   };
   return (
     <View style={styles.container}>
       <ScrollView>
         {!messages.length&&<Image source={images.ai} style={{width:responsiveWidth(22), height:responsiveHeight(12), alignSelf:"center", marginTop:responsiveWidth(50)}}></Image>}
         {messages.map((msg, index) => {
-          if (msg.includes("You")) {
+          if (msg.sender==='user') {
             return<>
-            <Text style={styles.chatText} key={`${index}${msg}`}>{msg}</Text>
+            <Text style={styles.chatText} key={`${index}`}>{msg.message}</Text>
               </>
-          } else if(msg.includes("ChatGPT")) {
+          } else if(msg.sender==='bot') {
             return<>
-            <Text style={styles.gptText} key={`${index} ${msg}`}>{msg}</Text>
+            <Text style={styles.gptText} key={`${index}`}>{msg.message}</Text>
               </>
           }
         })}

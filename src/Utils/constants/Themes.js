@@ -19,6 +19,5 @@ export const images = {
     arrowRight: require('../../Assets/arrowright.png'),
     drawerIcon: require('../../Assets/menu.png'),
     back: require('../../Assets/back.png'),
-    
-    
+    AuthLogo: require('../../Assets/AuthLogo.png'),
 }

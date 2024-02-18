@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import axios from 'axios';
 // import { OPENAI_KEY } from '@env';
-const OPENAI_KEY= "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"
+
+const OPENAI_KEY= "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" // final key
 const instance = axios.create({
   baseURL: 'https://api.openai.com/v1/engines/gpt-3.5-turbo-instruct/completions',
 //   baseURL: 'https://api.openai.com/v1/engines/davinci-codex/completions',

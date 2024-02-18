@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 import {
+  Alert,
     Image,
     ImageBackground,
     StatusBar,
@@ -7,12 +8,13 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+  View,
+    ScrollView
   } from 'react-native';
-import React, { useCallback, useState } from 'react';
-  import {images} from "../../Utils/constants/Themes"
+import React, {useState, useContext } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
-  import { postUsers } from '../../Utils/Api';
+import { postUsers } from '../../Utils/Api';
+  import { images } from '../../Utils/constants/Themes';
   import {
     responsiveFontSize,
     responsiveHeight,
@@ -20,39 +22,48 @@ import LinearGradient from 'react-native-linear-gradient';
   } from 'react-native-responsive-dimensions';
   import {useNavigation} from '@react-navigation/native';
 import { createUser } from '../../Utils/auth';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-  const Signup = () => {
+import { AuthContext } from '../../store/auth-context';
+import { Formik } from 'formik';
+import { signupSchema } from '../../Schemas/SignupShema';
+
+const Signup = () => {
+
     const navigation = useNavigation();
     const [email, setEmail] = useState(0);
     const [password, setPassword] = useState(0);
+    // const [name, setName] = useState("")
 
+  const authCtx = useContext(AuthContext)
 
-    const handleSignup = async () => {
+    const handleSignup = async (email, password) => {
       try {
         console.log(email, password, "email and password")
         // navigation.navigate('Login');
+        
         const res = await createUser(email, password)
-        const id = await postUsers()
-        console.log(id, "new generated id")
-      console.log(res, "Signup Response")
-       
+        // const id = await postUsers(name,email, password)
+        // console.log(id, "new generated id")
+        // authCtx.setUserId(id)
+
+        if (res) {
+          console.log("Signed up")
+          navigation.navigate("Login")
+        }
       } catch (error) {
         console.log(error)
-        
-      }
+        Alert.alert("Invalid Credentials", "Please Enter a valid  email.")
 
-      
-      
+      }
     }
     return (
-      <View  style={{
-        flex:1
+      <View   style={{
+        flex:1, 
       }}>
-      {/* // <ImageBackground */}
-        {/* // source={logo}
-        // style={{ */}
-        {/* //   flex: 1,
-        // }}> */}
+       <ImageBackground
+        //  source={images.logo}
+         style={{
+           flex: 1,
+         }}>
         <StatusBar
           translucent={true}
           barStyle={'dark-content'}
@@ -60,13 +71,7 @@ import { createUser } from '../../Utils/auth';
         />
   
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.pop();
-            }}>
-
-            <Image resizeMode="contain" source={images.back} style={styles.back} />
-          </TouchableOpacity>
+         
           <TouchableOpacity
            
             onPress={() => {
@@ -75,44 +80,76 @@ import { createUser } from '../../Utils/auth';
           >
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
-        </View>
-        <View style={{flex: 0.66}}>
-          <View>
-            <Text style={styles.txt_intro}>Sign Up</Text>
           </View>
-          <View
+          <Image source={images.AuthLogo} resizeMode="cover"
             style={{
-              gap: 10,
+              borderRadius:responsiveHeight(100),
+              marginBottom: responsiveWidth(15),
+              width: responsiveWidth(40),
+              height: responsiveWidth(40),
               alignSelf: 'center',
-              marginTop: responsiveHeight(3),
-            }}>
-            <View style={styles.txt_input}>
-              <TextInput placeholder="User Name" placeholderTextColor={'#000'} />
-            </View>
-            <View style={styles.txt_input}>
-              <TextInput value={email} onChangeText={(text)=>{setEmail(text)}} placeholder="Your Email" placeholderTextColor={'#000'} />
-            </View>
-            <View style={styles.txt_input}>
-              <TextInput value={password} onChangeText={(text)=>setPassword(text)} placeholder="Password" placeholderTextColor={'#000'} />
-            </View>
-            <View style={styles.txt_input}>
-              <TextInput
-                placeholder="Confirm Password"
-                placeholderTextColor={'#000'}
-              />
-            </View>
-          </View>
-          <TouchableOpacity  onPress={handleSignup}>
-            <LinearGradient
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}
-              colors={['#232323', '#020f00']}
-              style={styles.linearGradient}>
-              <Text style={[styles.btnText]}>Sign Up</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      {/* // </ImageBackground> */}
+            }}></Image>
+          <Formik
+              initialValues={{email: '', password: '',  confirmPassword:''}}
+              validationSchema={signupSchema}
+              onSubmit={(values) => handleSignup(values.email,values.password)} 
+          >
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+            }) => (<View style={{ flex: 0.66 }}>
+              <View>
+                <Text style={styles.txt_intro}>Sign Up</Text>
+              </View>
+              <View
+                style={{
+                  gap: 10,
+                  alignSelf: 'center',
+                  marginTop: responsiveHeight(3),
+                }}>
+                <View style={styles.txt_input}>
+                  <TextInput
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    value={values.email}
+                    placeholder="Your Email" placeholderTextColor={'#000'} />
+                           {touched.email && errors.email && <Text style={styles.error}>{errors.email}</Text>}
+                </View>
+                <View style={styles.txt_input}>
+                  <TextInput
+                      onChangeText={handleChange('password')}
+                      onBlur={handleBlur('password')}
+                    value={values.password}
+                    placeholder="Password" placeholderTextColor={'#000'} />
+                     {touched.password && errors.password && <Text style={styles.error}>{errors.password}</Text>}
+                </View>
+                <View style={styles.txt_input}>
+                  <TextInput
+                    placeholder="Confirm Password"
+                    onChangeText={handleChange('confirmPassword')}
+                    onBlur={handleBlur('confirmPassword')}
+                    placeholderTextColor={'#000'}
+                    value={values.confirmPassword}
+                  />
+                  {touched.confirmPassword && errors.confirmPassword && <Text style={styles.error}>{errors.confirmPassword}</Text>}
+                </View>
+              </View>
+              <TouchableOpacity onPress={handleSubmit}>
+                <LinearGradient
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  colors={['#232323', '#020f00']}
+                  style={styles.linearGradient}>
+                  <Text style={[styles.btnText]}>Sign Up</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>)}
+            </Formik>
+       </ImageBackground>
       </View>
     );
   };
@@ -126,6 +163,10 @@ import { createUser } from '../../Utils/auth';
   
       textAlign: 'center',
       fontSize: responsiveFontSize(4),
+    },
+    error: {
+      color: 'red',
+      // marginBottom:responsiveHeight(10)
     },
   
     linearGradient: {
@@ -152,7 +193,7 @@ import { createUser } from '../../Utils/auth';
       justifyContent: 'space-between',
       paddingHorizontal: responsiveWidth(6),
       paddingTop: responsiveHeight(4),
-      flex: 0.34,
+      flex: 0.1,
     },
     txt_input: {
       height: responsiveHeight(8),

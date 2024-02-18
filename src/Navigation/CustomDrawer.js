@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
-import React from 'react';
+import React, {useContext, useEffect , useState} from 'react';
 import {
   DrawerContent,
   DrawerContentScrollView,
@@ -14,35 +14,21 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import { colors, images } from '../Utils/constants/Themes';
-
-// import {useDispatch, useSelector} from 'react-redux';
-// import {logout} from '../Store/Reducers/Login';
-// import {setsongsclear} from '../Store/Reducers/AlbumsSlice';
+import { images } from '../Utils/constants/Themes';
+import { AuthContext } from '../store/auth-context';
 
 const CoustomDrawer = (props, { navigation }) => {
-  // const route = useRoute();
-  // const activeRouteName = route.name;
-//   const dispatch = useDispatch();
-//   const isAuthenticated = useSelector(state => state.auth);
-    //   const language = useSelector(state => state.auth.language);
-    const language = 'English'
-//   const Clint = useSelector(state => state.auth.user);
-  const handleLogout =  async () => {
+  const authCtx = useContext(AuthContext);
+  const handleLogout = async () => {
+    authCtx.logout();
     await AsyncStorage.setItem('token', '');
-    console.log("stored token", await AsyncStorage?.getItem('token'))
-    props.navigation.navigate('Auth');
-    // if (isAuthenticated) {
-    //   dispatch(logout());
-    //   dispatch(setsongsclear());
-    // }
+
   };
+
   return (
     <View
       style={{flex: 1, backgroundColor: '#000', height: responsiveHeight(100)}}>
       <DrawerContentScrollView >
-        {/* {activeRouteName !== 'Auth' && */}
-          {/* <> */}
            <View
           style={{
             height: responsiveHeight(25),
@@ -53,30 +39,26 @@ const CoustomDrawer = (props, { navigation }) => {
           }}>
           <View>
             <Image
-              resizeMode="contain"
-              source={images.logo}
+              resizeMode="cover"
+            tintColor={"white"}
+              source={images.AuthLogo}
               style={{
+                borderRadius:responsiveHeight(100),
                 height: responsiveHeight(15),
                 width: responsiveHeight(15),
               }}
             />
-            <Text
-              style={{
-                // color: colors.btncolor,
-                fontFamily: 'Poppins-Regular',
-                fontSize: responsiveFontSize(2.4),
-                marginTop: responsiveHeight(1),
-              }}>
-              Mulder's Fan
-            </Text>
+
             <Text
               style={{
                 color: '#FFF',
                 fontFamily: 'Poppins-Regular',
-                fontSize: responsiveFontSize(1.4),
+                marginTop:responsiveHeight(2),
+                fontSize: responsiveFontSize(2.5),
+                fontWeight:"bold"
               }}>
-                          {/* {Clint.email} */}
-                          123ibrahim@gmail.com
+                      
+                          Chat App
             </Text>
           </View>
         </View>
@@ -101,7 +83,7 @@ const CoustomDrawer = (props, { navigation }) => {
                   }}
                 />
               )}
-              label={language == 'English' ? 'Home' : 'Thuis'}
+              label="Home"
               labelStyle={{
                 color: '#fff',
                 fontFamily: 'Poppins-Regular',
@@ -126,7 +108,7 @@ const CoustomDrawer = (props, { navigation }) => {
                   style={{height: size, width: size, tintColor: color}}
                 />
               )}
-              label={language == 'English' ? 'About' : 'Favorieten'}
+              label="About"
               labelStyle={{
                 color: '#fff',
                 fontFamily: 'Poppins-Regular',
@@ -152,7 +134,7 @@ const CoustomDrawer = (props, { navigation }) => {
                   style={{height: size, width: size, tintColor: color}}
                 />
               )}
-              label={language == 'English' ? 'Settings' : 'Afspeellijsten'}
+              label="Settings"
               labelStyle={{
                 fontFamily: 'Poppins-Regular',
                 fontSize: responsiveFontSize(2.3),
@@ -182,7 +164,7 @@ const CoustomDrawer = (props, { navigation }) => {
                 style={{height: size, width: size, tintColor: color}}
               />
             )}
-            label={language === 'English' ? 'Logout' : 'Uitloggen'}
+            label="Logout"
             labelStyle={{
               color: '#fff',
               fontFamily: 'Poppins-Regular',

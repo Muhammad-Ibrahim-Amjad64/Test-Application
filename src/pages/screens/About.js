@@ -1,4 +1,7 @@
 /* eslint-disable prettier/prettier */
+
+
+
 import {
   StyleSheet,
   Text,
@@ -7,18 +10,102 @@ import {
   Image,
   StatusBar,
 } from 'react-native';
-import React from 'react';
+import React, {useContext, useEffect} from 'react';
+import {useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
-// import back from '../../Assets/back.png';
-import profile from '../../Assets/logo.png';
+import { images } from '../../Utils/constants/Themes';
 import LinearGradient from 'react-native-linear-gradient';
-
+import {launchImageLibrary} from 'react-native-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-const Profile = () => {
+import {TextInput} from 'react-native-gesture-handler';
+import { updateUsersName } from '../../Utils/Api';
+import { updatePhote } from '../../Utils/Api';
+import { AuthContext } from '../../store/auth-context';
+
+const About = () => {
+  const [imageUri, setImageUri] = useState(null);
+  const [name, setName] = useState('guest');
+  const [editName, setEditName] = useState(false);
+  const authCtx = useContext(AuthContext);
+
+
+
+  useEffect(() => {
+    const getUri=  async() => {
+      const uri = await  AsyncStorage.getItem('uri')
+      console.log(uri, "uri from async storage")
+      setImageUri(uri);
+    }
+
+    const getName = async () => {
+      const name = await AsyncStorage.getItem('name')
+      setName(name);
+   
+
+    }
+    getName()
+    getUri()
+
+},[])
+  const handleNameEdit = () => {
+    setEditName(true);
+  };
+
+  const saveName = async() => {
+    await AsyncStorage.setItem('name', name.toString())
+  }
+  const onSavedName = async ()=>{
+    try {
+      setEditName(false)
+      
+      const res =  await updateUsersName(name)
+      console.log(res, "username updated")
+      saveName()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const saveImageUri = async (image) => {
+    await AsyncStorage.setItem('uri', image.toString())
+
+  };
+
+ 
+  const handleOnChangeName = name => {
+    setName(name);
+  };
+
+  const openImagePicker = () => {
+    const options = {
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+    };
+
+    launchImageLibrary  (options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('Image picker error: ', response.error);
+      } else {
+        let imageUri = response.uri || response.assets?.[0]?.uri;
+        setImageUri(imageUri);
+        console.log(imageUri, "imageUri")
+        updatePhote(imageUri);
+        saveImageUri(imageUri)
+      }
+    });   
+  };
+  const handleLogout = () => {
+    authCtx.logout();
+  };
   return (
     <SafeAreaView
       edges={['bottom']}
@@ -26,46 +113,92 @@ const Profile = () => {
       <StatusBar barStyle={'dark-content'} backgroundColor={'transparent'} />
       <View
         style={{
-
-          // flex: 0.3,
           paddingTop: responsiveHeight(2),
         }}>
-        {/* <View style={styles.header}>
-          <Text style={styles.buttonText}>Profile</Text>
-        </View> */}
+      
       </View>
       <View>
         <View style={{marginTop: responsiveHeight(4)}}>
+
+
+          
           <Image
-            source={profile}
-            resizeMode="contain"
+            source={!imageUri ? images.logo : {uri: imageUri}}
+            resizeMode="cover"
             style={{
-              marginBottom:responsiveWidth(10),
-              width: responsiveWidth(60),
-              height: responsiveWidth(50),
+              borderRadius:responsiveHeight(100),
+              marginBottom: responsiveWidth(15),
+              width: responsiveWidth(40),
+              height: responsiveWidth(40),
               alignSelf: 'center',
+            
             }}
           />
-
+    {/* </View> */}
           <Text style={styles.welcome}>Welcome Back</Text>
-          <Text style={styles.name}>Muhammad Ibrahim</Text>
-        </View>
-
-        <TouchableOpacity>
+          <Text style={styles.name}>{name?name:"guest"}</Text>
+          {/* <Text style={styles.name}>{"Muhammad Ibrahim KHAN"}</Text> */}
+          {editName && (
+            <View style={{flexDirection:"row", alignSelf:"center",width:responsiveWidth(90),justifyContent:"space-between"}}>
+              <TextInput
+              style={styles.TextInput}
+                value={name}
+                onChangeText={handleOnChangeName}
+                placeholder={'Enter new Name'}></TextInput>
+                 <TouchableOpacity onPress={onSavedName} >
           <LinearGradient
             start={{x: 0, y: 0}}
             end={{x: 2, y: 0}}
             colors={['#232323', '#020f00']}
-            style={styles.linearGradient}>
-            <Text style={[styles.btnText]}>Log Out</Text>
+            // style={styles.linearGradient}
+            style={styles.confirm}
+            >
+            <Text style={[styles.loginbtnTxt]}>Confirm</Text>
           </LinearGradient>
         </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
+      <View style={{flexDirection:"row", width:responsiveWidth(85), alignSelf:"center",justifyContent:"space-between"}}>
+
+    
+<TouchableOpacity onPress={openImagePicker}>
+  <LinearGradient
+    start={{x: 0, y: 0}}
+    end={{x: 2, y: 0}}
+    colors={['#fff', '#fff']}
+    style={styles.linearGradient}>
+    <Text style={[styles.btnText]}>Upload Image</Text>
+  </LinearGradient>
+</TouchableOpacity>
+<TouchableOpacity>
+  <LinearGradient
+    start={{x: 0, y: 0}}
+    end={{x: 2, y: 0}}
+    colors={['#fff', '#fff']}
+    style={styles.linearGradient}>
+    <Text onPress={handleNameEdit} style={[styles.btnText]}>
+      Edit Name
+    </Text>
+  </LinearGradient>
+</TouchableOpacity>
+</View>
+      <TouchableOpacity onPress={handleLogout}>
+        <LinearGradient
+          start={{x: 0, y: 0}}
+          end={{x: 2, y: 0}}
+          colors={['#232323', '#020f00']}
+          style={styles.logoutGradient}>
+          <Text style={[styles.loginbtnTxt]}>Log Out</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+    
     </SafeAreaView>
   );
 };
 
-export default Profile;
+export default About;
 
 const styles = StyleSheet.create({
   header: {
@@ -99,6 +232,17 @@ const styles = StyleSheet.create({
   },
   linearGradient: {
     height: responsiveHeight(7),
+    width: responsiveWidth(40),
+    borderRadius: responsiveWidth(30),
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: responsiveHeight(4),
+    borderColor:"black",
+    borderWidth:responsiveWidth(.3)
+  },
+  logoutGradient:{
+    height: responsiveHeight(7),
     width: responsiveWidth(85),
     borderRadius: responsiveWidth(30),
     alignItems: 'center',
@@ -109,6 +253,32 @@ const styles = StyleSheet.create({
   btnText: {
     fontSize: responsiveFontSize(2.2),
     fontWeight: 'bold',
-    color: '#fff',
+    // color: '#fff',
+    color: 'black',
   },
+  loginbtnTxt:{
+    fontSize: responsiveFontSize(2.2),
+    fontWeight: 'bold',
+    color: '#fff',
+   
+  },
+  confirm:{width:responsiveWidth(25)
+  , height: responsiveHeight(7),
+
+  borderRadius: responsiveWidth(30),
+  alignItems: 'center',
+  justifyContent: 'center',
+  alignSelf: 'center'},
+  TextInput: {
+    height: responsiveHeight(7),
+    width: responsiveWidth(60),
+    borderRadius: responsiveWidth(30),
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    fontSize: responsiveFontSize(2),
+    backgroundColor:"#ebebeb"
+  },
+  
 });
+
